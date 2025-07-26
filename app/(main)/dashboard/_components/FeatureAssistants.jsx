@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ExpertsList } from '@/services/Options';
 import { useUser } from '@stackframe/stack';
 import React from 'react';
-import Image from 'next/image'; // ✅ Import Image
+import Image from 'next/image'; 
 import { BlurFade } from '@/components/magicui/blur-fade';
 
 function FeatureAssistants() {
