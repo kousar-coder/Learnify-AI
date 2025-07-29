@@ -1,10 +1,11 @@
 "use client";
 import { Button } from '@/components/ui/button';
-import { ExpertsList } from '@/services/Options';
+import { coachingOptions } from '@/services/Options';
 import { useUser } from '@stackframe/stack';
 import React from 'react';
 import Image from 'next/image'; 
 import { BlurFade } from '@/components/magicui/blur-fade';
+import UserInputDialog from './UserInputDialog';
 
 function FeatureAssistants() {
   const user = useUser();
@@ -24,9 +25,13 @@ function FeatureAssistants() {
 
       {/* Experts List Section */}
       <div className='grid grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-10 mt-10'>
-        {ExpertsList.map((option, index) => (
+        {coachingOptions.map((option, index) => (
             <BlurFade key={option.icon} delay={0.25+index*0.05} inView>
-          <div key={index} className='p-3 bg-secondary rounded-3xl flex flex-col justify-center items-center'>
+              
+         <div key={index} className='p-3 bg-secondary rounded-3xl flex flex-col justify-center items-center'>
+
+              <UserInputDialog coachingOptions={option}>
+          <div key={index} className='flex flex-col justify-center items-center'>
             <Image
               src={option.icon}
               alt={option.name}
@@ -36,6 +41,8 @@ function FeatureAssistants() {
             />
             <h2 className='mt-2'>{option.name}</h2>
           </div>
+          </UserInputDialog>
+           </div>
           </BlurFade>
         ))}
       </div>

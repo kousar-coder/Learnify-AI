@@ -3,7 +3,7 @@ import { useUser } from '@stackframe/stack'
 import { useMutation } from 'convex/react';
 import React, { useEffect, useState } from 'react'
 import { UserContext } from './_context/UserContext';
-
+import { api } from '@/convex/_generated/api'; 
 function AuthProvider({children}) {
 
     const user=useUser();

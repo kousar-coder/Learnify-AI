@@ -1,5 +1,5 @@
 import { mutation } from "./_generated/server";
-
+import {v} from "convex/values";
 export const CreateUser=mutation({
     args:{
         name:v.string(),
@@ -22,7 +22,7 @@ export const CreateUser=mutation({
             const result=await convexToJson.db.insert('users',{
                 ...data
             });
-            return data;
+            return { _id: result, ...data };
         }
         return userData[0]
     }
