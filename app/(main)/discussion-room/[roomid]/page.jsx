@@ -8,6 +8,9 @@ import { useQuery } from 'convex/react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
+import { getToken } from '@/services/GlobalServices';
+import { RealtimeTranscriber } from 'assemblyai';
+
 // import RecordRTC from 'recordrtc';
 // const RecordRTC = dynamic(()=>import("recordrtc"),{ssr:false});
 
@@ -18,6 +21,7 @@ function DiscussionRoom() {
     const [expert,setExpert]=useState();
     const [enableMic,setEnableMic]=useState(false);
     const recorder=useRef(null)
+    const realtimeTranscriber=useRef(null);
     let silenceTimeout;
     useEffect(()=>{
         if(DiscussionRoomData){
@@ -29,6 +33,18 @@ function DiscussionRoom() {
 
 const connectToServer = async () => {
   setEnableMic(true);
+
+   //Init asssembly AI
+   realtimeTranscriber.current=new RealtimeTranscriber({
+    token:await getToken(),
+    sample_rate: 16_000
+   })
+
+   realtimeTranscriber.current.on('transcript',async(transcript)=>{
+    console.log(transcript);
+   })
+
+  await realtimeTranscriber.current.connect();
 
   if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
     try {
@@ -50,9 +66,11 @@ const connectToServer = async () => {
         bufferSize: 4096,
         audioBitsPerSecond: 128000,
         ondataavailable: async (blob) => {
+          if(!realtimeTranscriber.current) return;
           clearTimeout(silenceTimeout);
           const buffer = await blob.arrayBuffer();
           console.log(buffer);
+          realtimeTranscriber.current.sendAudio(buffer)
           silenceTimeout = setTimeout(() => {
             console.log('User stopped talking');
           }, 2000);
@@ -69,13 +87,21 @@ const connectToServer = async () => {
   }
 };
 
-const disconnect=(e)=>{
-     e.preventDefault();
+const disconnect = async (e) => {
+  e.preventDefault();
 
-     recorder.current.pauseRecording();
-     recorder.current=null;
-     setEnableMic(false);
-}
+  if (realtimeTranscriber.current) {
+    await realtimeTranscriber.current.close();
+    realtimeTranscriber.current = null;
+  }
+
+  if (recorder.current) {
+    recorder.current.pauseRecording();
+    recorder.current = null;
+  }
+
+  setEnableMic(false);
+};
   return (
     <div className='-mt-12'>
         <h2 className='text-lg font-bold'>{DiscussionRoomData?.coachingOptions}</h2>
